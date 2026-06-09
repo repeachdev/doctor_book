@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>KMLE 단권화 · 마인드맵</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,500&display=swap" rel="stylesheet">
+<style>
+  /* ===== Mistral AI tokens (DESIGN.md) ===== */
+  :root{
+    --primary:#fa520f; --primary-deep:#cc3a05; --on-primary:#fff;
+    --sunshine-500:#ffb83e; --sunshine-700:#ffa110; --yellow:#ffd900;
+    --cream:#fff8e0; --cream-soft:#fffaeb; --cream-deeper:#fff0c2; --beige:#e6d5a8;
+    --ink:#1f1f1f; --ink-tint:#3d3d3d; --charcoal:#2c2c2c; --slate:#4a4a4a;
+    --steel:#6a6a6a; --stone:#8a8a8a; --muted:#a8a8a8;
+    --hairline:#e5e5e5; --hairline-soft:#ededed; --hairline-strong:#c7c7c7;
+    --canvas:#ffffff; --surface:#fafafa;
+    --line:#d8c9a0;                 /* warm connector hairline */
+    --amber:#ffa110;                /* 내과 accent */
+    --branch-sg:#2c2c2c;            /* 외과 accent (ink, distinct from orange root) */
+    /* spacing ladder */
+    --xxs:4px; --xs:8px; --sm:12px; --md:16px; --lg:20px; --xl:24px; --xxl:32px;
+    --sans:'Inter',-apple-system,system-ui,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    --serif:'Noto Serif KR','Fraunces','PP Editorial Old',Georgia,'Times New Roman',serif;
+    /* radii */
+    --r-md:8px; --r-lg:12px; --r-full:9999px;
+    --shadow-card:rgba(0,0,0,.05) 0 4px 12px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{font-family:var(--sans);color:var(--ink);}
+
+  /* ===== editorial control panel ===== */
+  .panel{
+    position:fixed;z-index:30;top:var(--lg);left:var(--lg);
+    background:var(--canvas);border:1px solid var(--hairline);
+    border-radius:var(--r-lg);padding:var(--xl);max-width:300px;box-shadow:var(--shadow-card);
+  }
+  .panel .eyebrow{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;
+                  color:var(--primary);margin-bottom:var(--xs);}
+  .panel h1{font-family:var(--serif);font-size:30px;font-weight:500;line-height:1.1;
+            letter-spacing:-.5px;margin:0 0 var(--lg);color:var(--ink);}
+  .row{display:flex;gap:var(--xs);flex-wrap:wrap;}
+  .btn{
+    font-family:var(--sans);font-size:14px;font-weight:500;line-height:1.3;
+    background:transparent;color:var(--ink);border:1px solid var(--hairline-strong);
+    padding:9px 16px;border-radius:var(--r-md);cursor:pointer;transition:.15s;
+  }
+  .btn:hover{border-color:var(--ink);}
+  .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff;}
+  .btn.primary:hover{background:var(--primary-deep);border-color:var(--primary-deep);}
+  .btn.icn{padding:9px 0;width:42px;text-align:center;font-size:16px;}
+  .legend{display:flex;gap:var(--md);flex-wrap:wrap;margin-top:var(--lg);
+          font-size:12px;font-weight:500;color:var(--steel);}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:10px;height:10px;border-radius:3px;display:inline-block;}
+
+  .hint{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:30;
+        color:var(--steel);font-size:13px;font-weight:500;
+        background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-full);
+        padding:8px 18px;white-space:nowrap;box-shadow:var(--shadow-card);}
+
+  /* signature sunset stripe — closes the page */
+  .sunset{position:fixed;left:0;right:0;bottom:0;height:8px;z-index:40;
+    background:linear-gradient(90deg,#cc3a05 0%,var(--primary) 16%,var(--sunshine-700) 42%,
+                               var(--yellow) 70%,var(--cream) 100%);}
+
+  /* ===== pan / zoom ===== */
+  #viewport{position:fixed;inset:0;overflow:hidden;cursor:grab;touch-action:none;
+    background:
+      radial-gradient(1100px 620px at 88% -8%, #ffe2a8 0%, rgba(255,226,168,0) 55%),
+      radial-gradient(900px 600px at 8% 108%, #ffe9cf 0%, rgba(255,233,207,0) 50%),
+      linear-gradient(180deg,var(--cream-soft) 0%, #ffffff 60%);}
+  #viewport.grabbing{cursor:grabbing;}
+  #canvas{position:absolute;top:0;left:0;width:max-content;transform-origin:0 0;padding:64px;}
+
+  /* ===== horizontal tree ===== */
+  ul.tree,ul.children{list-style:none;margin:0;padding:0;}
+  li.node{display:flex;align-items:center;}
+
+  .card{
+    position:relative;display:flex;align-items:center;gap:var(--md);flex:0 0 auto;
+    background:var(--canvas);border:1px solid var(--hairline-soft);border-radius:var(--r-lg);
+    padding:14px 20px;cursor:pointer;white-space:nowrap;box-shadow:var(--shadow-card);
+    transition:border-color .15s, box-shadow .15s, transform .1s;
+  }
+  .card:hover{border-color:var(--hairline-strong);}
+  .card .chev{width:11px;color:var(--stone);font-size:15px;line-height:1;flex:0 0 auto;
+              transition:transform .22s ease,color .15s;}
+  li.open > .card .chev{transform:rotate(90deg);color:var(--primary);}
+  .card .txt{display:flex;flex-direction:column;gap:2px;}
+  .card .cap{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--primary);}
+  .card .label{font-size:16px;font-weight:500;color:var(--ink);line-height:1.3;}
+  .card .idx{font-family:var(--serif);font-size:24px;font-weight:500;letter-spacing:-1px;
+             color:var(--steel);min-width:34px;flex:0 0 auto;line-height:1;}
+
+  /* root — orange voltage, editorial serif */
+  .lvl-root > .card{padding:var(--xl) var(--xxl);border-color:var(--beige);
+                    background:var(--cream);border-left:5px solid var(--primary);}
+  .lvl-root > .card .label{font-family:var(--serif);font-size:30px;font-weight:500;letter-spacing:-.5px;}
+  .lvl-root > .card .chev{color:var(--primary);}
+
+  /* branch 내과 (amber) / 외과 (ink) */
+  .branch > .card{padding:18px var(--xl);}
+  .branch > .card .label{font-family:var(--serif);font-size:22px;font-weight:500;letter-spacing:-.4px;}
+  .im.branch > .card{border-left:5px solid var(--amber);background:var(--cream-soft);}
+  .im.branch > .card .idx,.im.branch > .card .chev{color:var(--amber);}
+  .sg.branch > .card{border-left:5px solid var(--branch-sg);background:#fbfbfb;}
+  .sg.branch > .card .idx,.sg.branch > .card .chev{color:var(--branch-sg);}
+
+  /* subject */
+  .subject > .card{background:var(--canvas);}
+  .subject > .card .label{font-weight:500;}
+
+  /* group (위장관 / 간담췌) */
+  .group > .card{background:var(--cream-soft);border-color:var(--beige);}
+  .group > .card .label{font-weight:500;color:var(--ink-tint);}
+
+  /* leaf */
+  .leaf > .card{background:var(--surface);border-style:solid;border-color:var(--hairline);
+                box-shadow:none;cursor:default;}
+  .leaf > .card:hover{border-color:var(--hairline);}
+  .leaf > .card .label{font-size:14px;font-weight:400;color:var(--steel);}
+  .leaf > .card .chev,
+  li.node:not(.has) > .card .chev{display:none;}
+
+  /* children block + connectors */
+  li.node > ul.children{display:flex;flex-direction:column;justify-content:center;
+                        position:relative;margin-left:var(--xxl);}
+  li.node:not(.open) > ul.children{display:none;}
+  li.node > ul.children::before{content:"";position:absolute;top:50%;left:calc(var(--xxl) * -1);
+                                width:var(--xxl);height:2px;background:var(--line);}
+  ul.children > li.node{position:relative;padding:var(--xs) 0 var(--xs) var(--xxl);}
+  ul.children > li.node::before{content:"";position:absolute;left:0;top:50%;
+                                width:var(--xxl);height:2px;background:var(--line);}
+  ul.children > li.node::after{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--line);}
+  ul.children > li.node:first-child::after{top:50%;}
+  ul.children > li.node:last-child::after{bottom:50%;}
+  ul.children > li.node:only-child::after{display:none;}
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <div class="eyebrow">KMLE · ACM 단권화</div>
+  <h1>국가시험 마인드맵</h1>
+  <div class="row">
+    <button class="btn" onclick="expandAll()">전체 펼치기</button>
+    <button class="btn" onclick="collapseAll()">전체 접기</button>
+  </div>
+  <div class="row" style="margin-top:var(--xs);">
+    <button class="btn primary" onclick="fitView()">한눈에 보기</button>
+    <button class="btn icn" onclick="zoomBy(1.2)">＋</button>
+    <button class="btn icn" onclick="zoomBy(1/1.2)">－</button>
+    <button class="btn" onclick="resetView()" style="padding:9px 14px;">100%</button>
+  </div>
+  <div class="legend">
+    <span><i class="dot" style="background:var(--primary)"></i>국가시험</span>
+    <span><i class="dot" style="background:var(--amber)"></i>내과</span>
+    <span><i class="dot" style="background:var(--branch-sg)"></i>외과</span>
+  </div>
+</div>
+
+<div class="hint">휠 = 이동 · Ctrl+휠 / 핀치 = 확대축소 · 드래그 = 이동 · 카드 클릭 = 펼침</div>
+
+<div id="viewport"><div id="canvas"><ul class="tree" id="treeRoot"></ul></div></div>
+<div class="sunset"></div>
+
+<script>
+/* ===== 데이터 (책 목차 기반) =====
+   현재는 '과목'까지만 노출. 각 과목의 children 주석을 풀면 챕터가 다시 펼쳐집니다. */
+const DATA = {
+  cap:"한국의사국가시험", label:"단권화 정리본", type:"root",
+  children:[
+    { label:"내과", type:"im", children:[
+
+      { label:"순환기", type:"subject" /*, children:[
+        "심혈관계 진찰","부정맥","판막질환","심부전","심근질환","심막질환",
+        "허혈성 심장질환","급성심근경색","감염 심내막염","심장응급질환","대동맥 질환","고혈압"
+      ] */ },
+
+      { label:"호흡기", type:"subject" /*, children:[
+        "호흡기계 진찰","폐 기능 장애","폐 질환 검사법","천식","과민성 폐렴과 호산구 폐렴",
+        "폐렴","폐농양","기관지확장증","폐결핵","폐고혈압증","만성폐쇄성폐질환(COPD)",
+        "간질성 폐질환","직업성 폐질환","폐암","폐색전증","흉막과 종격동 질환",
+        "환기 장애","급성 호흡곤란 증후군(ARDS)","기계보조환기"
+      ] */ },
+
+      { label:"소화기", type:"subject", children:[
+        { label:"위장관", type:"group" /*, children:[
+          "복부 증상론·진단학","위장관 출혈","식도질환","위·십이지장 질환","위암","흡수장애",
+          "염증성 장질환","과민성 대장증후군","곁주머니 질환","혈관 질환","급성 장폐색","소장·결장·직장암"
+        ] */ },
+        { label:"간담췌", type:"group" /*, children:[
+          "간 질환의 진단적 접근","황달과 고빌리루빈혈증","급성 간염","만성 간염",
+          "간 농양 및 기타 간질환","알코올성·비알코올성 간질환","간경변증 및 합병증",
+          "간 종양","쓸개 및 쓸개관 질환","이자(췌장) 질환"
+        ] */ }
+      ]},
+
+      { label:"신장", type:"subject" /*, children:[
+        "수분 및 전해질 대사 장애","세관기능장애","산-염기 대사장애","콩팥질환의 접근",
+        "급성콩팥기능상실","만성콩팥기능상실·신대체요법","콩팥토리 질환",
+        "콩팥세관사이질·혈관 질환","콩팥세관 질환","요로돌","요로폐색","요로감염"
+      ] */ },
+
+      { label:"내분비", type:"subject" /*, children:[
+        "뇌하수체 전엽 질환","뇌하수체 후엽 질환","갑상샘 질환","부신 피질 질환","부신 수질 질환",
+        "당뇨병","저혈당","지질대사 이상","부갑상샘 및 칼슘 대사","뼈엉성증(골다공증)","기타 내분비 질환"
+      ] */ },
+
+      { label:"감염", type:"subject" /*, children:[
+        "감염성 질환 기본 고찰","지역사회 감염증","병원 내 감염","그람양성균 질환","그람음성균 질환",
+        "기타 세균 감염증","스피로헤타병","리케차·미코플라즈마","바이러스 질환","진균 감염",
+        "원생동물 감염","기생충 감염","성인예방접종"
+      ] */ },
+
+      { label:"류마티스", type:"subject" /*, children:[
+        "류마티스 질환의 접근","전신홍반루푸스(SLE)","염증성 근육병증","쇼그렌 증후군","혈관염",
+        "척추관절병증","류마티스관절염","골관절염","결정유발 관절염","감염 관절염","기타 관절염"
+      ] */ },
+
+      { label:"알레르기", type:"subject" /*, children:[
+        "알레르기 질환의 진단","아나필락시스","혈청병","두드러기","혈관부종",
+        "알레르기 비염","음식 알레르기","약물 알레르기"
+      ] */ },
+
+      { label:"혈액", type:"subject" /*, children:[
+        "빈혈에 대한 접근","적혈구 질환(빈혈의 종류)","골수 기능 부전","출혈질환의 접근",
+        "혈소판 장애","응고인자 장애","혈관벽 장애","파종혈관내응고(DIC)","백혈병","림프종",
+        "다발골수종","골수증식종양","종양의 진단·치료","종양의 합병증"
+      ] */ }
+
+    ]},
+
+    { label:"외과", type:"sg", children:[
+
+      { label:"외과총론", type:"subject" /*, children:[
+        "해부학","수액·전해질·쇼크","수혈의 원칙 및 부작용","수술 환자의 신진대사","외과적 창상",
+        "수술 전 처치","외과적 감염 및 예방적 처치","외과적 합병증","부위마취","외상","화상",
+        "뱀물림과 동물물림","수기"
+      ] */ },
+
+      { label:"외과각론", type:"subject" /*, children:[
+        "갑상샘·부갑상샘(내분비외과)","유방","탈장","급성 복증","위와 샘창자","막창자꼬리(충수)",
+        "소장","결장 및 직장","항문","간","쓸개 및 쓸개관","췌장","지라(비장)","혈관","소아외과"
+      ] */ }
+
+    ]}
+  ]
+};
+
+/* ===== 렌더러 ===== */
+function makeNode(node, inherit, idx){
+  const isLeaf = (typeof node === "string");
+  const label  = isLeaf ? node : node.label;
+  const type   = isLeaf ? "leaf" : (node.type || "group");
+  const kids   = isLeaf ? null : node.children;
+  const isBranch = (type==="im"||type==="sg");
+
+  const li = document.createElement("li");
+  li.className = "node " + (type==="root" ? "lvl-root" : type) + (isBranch ? " branch" : "");
+  if(inherit) li.classList.add(inherit);
+  if(kids && kids.length) li.classList.add("has");
+
+  const card = document.createElement("div");
+  card.className = "card";
+
+  const chev = document.createElement("span");
+  chev.className = "chev"; chev.textContent = "›";
+  card.appendChild(chev);
+
+  if(isBranch && idx!=null){
+    const ix = document.createElement("span");
+    ix.className="idx"; ix.textContent = String(idx).padStart(2,"0");
+    card.appendChild(ix);
+  }
+
+  const txt = document.createElement("span");
+  txt.className = "txt";
+  if(!isLeaf && node.cap){
+    const cap=document.createElement("span"); cap.className="cap"; cap.textContent=node.cap;
+    txt.appendChild(cap);
+  }
+  const lab=document.createElement("span"); lab.className="label"; lab.textContent=label;
+  txt.appendChild(lab);
+  card.appendChild(txt);
+  li.appendChild(card);
+
+  if(kids && kids.length){
+    const ul=document.createElement("ul"); ul.className="children";
+    const pass = isBranch ? type : inherit;
+    kids.forEach((c,i)=> ul.appendChild(makeNode(c, pass, i+1)));
+    li.appendChild(ul);
+
+    /* === 클릭 시 펼침/접힘 + 클릭한 카드를 화면 제자리에 고정(앵커) === */
+    card.addEventListener("click", e=>{
+      e.stopPropagation();
+      const before = card.getBoundingClientRect();
+      li.classList.toggle("open");
+      const after = card.getBoundingClientRect();
+      tx += before.left - after.left;
+      ty += before.top  - after.top;
+      apply();
+    });
+  }
+  return li;
+}
+
+const treeRoot = document.getElementById("treeRoot");
+treeRoot.appendChild(makeNode(DATA, null, null));
+
+function setOpen(state){
+  document.querySelectorAll("li.node.has").forEach(li => li.classList.toggle("open", state));
+}
+function expandAll(){ setOpen(true);  requestAnimationFrame(fitView); }
+function collapseAll(){
+  document.querySelectorAll("li.node.has").forEach(li=>li.classList.remove("open"));
+  document.querySelector("li.lvl-root").classList.add("open"); // 루트는 유지
+  requestAnimationFrame(fitView);
+}
+
+/* ===== pan & zoom (Figma 스타일) ===== */
+const viewport = document.getElementById("viewport");
+const canvas   = document.getElementById("canvas");
+let scale=1, tx=0, ty=0;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function apply(){ canvas.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`; }
+
+function zoomAt(px,py,factor){
+  const ns=clamp(scale*factor,0.12,3.5);
+  tx = px-(px-tx)*(ns/scale);
+  ty = py-(py-ty)*(ns/scale);
+  scale=ns; apply();
+}
+function zoomBy(f){ zoomAt(viewport.clientWidth/2, viewport.clientHeight/2, f); }
+function resetView(){ scale=1; tx=64; ty=64; apply(); }
+
+function fitView(){
+  const cw=canvas.offsetWidth, ch=canvas.offsetHeight;
+  const vw=viewport.clientWidth, vh=viewport.clientHeight, pad=90;
+  scale=clamp(Math.min((vw-pad)/cw,(vh-pad)/ch),0.12,1.6);
+  tx=(vw-cw*scale)/2; ty=(vh-ch*scale)/2; apply();
+}
+
+viewport.addEventListener("wheel", e=>{
+  e.preventDefault();
+  const r=viewport.getBoundingClientRect();
+  if(e.ctrlKey || e.metaKey){
+    zoomAt(e.clientX-r.left, e.clientY-r.top, Math.exp(-e.deltaY*0.0016));
+  }else{
+    tx -= e.deltaX; ty -= e.deltaY; apply();
+  }
+},{passive:false});
+
+const pts=new Map(); let pinch=null;
+viewport.addEventListener("pointerdown", e=>{
+  if(e.target.closest(".card")) return;     // 카드 클릭은 펼침 처리
+  pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  viewport.setPointerCapture(e.pointerId);
+  viewport.classList.add("grabbing");
+  if(pts.size===2) startPinch();
+});
+viewport.addEventListener("pointermove", e=>{
+  if(!pts.has(e.pointerId)) return;
+  const prev=pts.get(e.pointerId);
+  pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pts.size===2 && pinch){ doPinch(); return; }
+  if(pts.size===1){ tx+=e.clientX-prev.x; ty+=e.clientY-prev.y; apply(); }
+});
+function endPt(e){ pts.delete(e.pointerId); if(pts.size<2) pinch=null; if(pts.size===0) viewport.classList.remove("grabbing"); }
+viewport.addEventListener("pointerup", endPt);
+viewport.addEventListener("pointercancel", endPt);
+function pp(){ return [...pts.values()]; }
+function startPinch(){
+  const[a,b]=pp(); const r=viewport.getBoundingClientRect();
+  pinch={d:Math.hypot(a.x-b.x,a.y-b.y), cx:(a.x+b.x)/2-r.left, cy:(a.y+b.y)/2-r.top};
+}
+function doPinch(){
+  const[a,b]=pp(); const nd=Math.hypot(a.x-b.x,a.y-b.y);
+  zoomAt(pinch.cx,pinch.cy, nd/pinch.d); pinch.d=nd;
+}
+
+/* 시작: 전체 펼친 상태로 한눈에 */
+setOpen(true);
+window.addEventListener("load", fitView);
+fitView();
+</script>
+</body>
+</html>
