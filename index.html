@@ -126,6 +126,14 @@
   .leaf > .card .chev,
   li.node:not(.has) > .card .chev{display:none;}
 
+  /* linked leaf — opens a summary HTML in a new tab */
+  .leaf.link > .card{background:var(--canvas);border-color:var(--beige);
+                     box-shadow:var(--shadow-card);cursor:pointer;}
+  .leaf.link > .card:hover{border-color:var(--primary);}
+  .leaf.link > .card .label{font-size:15px;font-weight:500;color:var(--ink);}
+  .leaf.link > .card .go{color:var(--primary);font-size:14px;font-weight:600;
+                         flex:0 0 auto;margin-left:var(--xs);}
+
   /* children block + connectors */
   li.node > ul.children{display:flex;flex-direction:column;justify-content:center;
                         position:relative;margin-left:var(--xxl);}
@@ -176,10 +184,11 @@ const DATA = {
   children:[
     { label:"내과", type:"im", children:[
 
-      { label:"순환기", type:"subject" /*, children:[
-        "심혈관계 진찰","부정맥","판막질환","심부전","심근질환","심막질환",
-        "허혈성 심장질환","급성심근경색","감염 심내막염","심장응급질환","대동맥 질환","고혈압"
-      ] */ },
+      { label:"순환기", type:"subject", children:[
+        { cap:"01", label:"심혈관계 진찰 · 부정맥 · 판막질환", type:"leaf", href:"1/1. 순환기/01.html" },
+        { cap:"02", label:"심부전 · 심근 · 심막 · 허혈성 심장질환", type:"leaf", href:"1/1. 순환기/02.html" },
+        { cap:"03", label:"급성심근경색 · 감염 심내막염 · 심장응급 · 대동맥 · 고혈압 · 종양", type:"leaf", href:"1/1. 순환기/03.html" }
+      ]},
 
       { label:"호흡기", type:"subject" /*, children:[
         "호흡기계 진찰","폐 기능 장애","폐 질환 검사법","천식","과민성 폐렴과 호산구 폐렴",
@@ -287,6 +296,18 @@ function makeNode(node, inherit, idx){
   const lab=document.createElement("span"); lab.className="label"; lab.textContent=label;
   txt.appendChild(lab);
   card.appendChild(txt);
+
+  /* === 요약본 HTML 링크 leaf === */
+  if(!isLeaf && node.href){
+    li.classList.add("link");
+    const go=document.createElement("span"); go.className="go"; go.textContent="↗";
+    card.appendChild(go);
+    card.addEventListener("click", e=>{
+      e.stopPropagation();
+      window.open(encodeURI(node.href), "_blank", "noopener");
+    });
+  }
+
   li.appendChild(card);
 
   if(kids && kids.length){
