@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>단권화 요약본 — A4 템플릿</title>
+<!--
+  ============================================================================
+   KMLE · ACM 단권화 요약본  ―  A4 템플릿 (중립 브랜딩 / 2027대비)
+  ============================================================================
+  · 원본 교재의 레이아웃·서식을 재현한 재사용 템플릿입니다.
+  · 브랜딩(유니온/UNION/HI-PASS/unionbook.co.kr)은 모두 제거했습니다.
+  · 새 요약본을 만들 때:  <section class="page"> ... </section> 블록을
+    필요한 만큼 복제하고, 안쪽 내용만 교체하세요. 컴포넌트 클래스는
+    아래 "컴포넌트 사용 예시" 페이지를 그대로 복사해 쓰면 됩니다.
+  · 색 계열(section color)은 장(章)마다 바꿉니다:
+    .c-purple / .c-teal / .c-blue / .c-orange / .c-red  를 .page 또는
+    개별 요소에 붙이면 뱃지·탭·표 헤더 색이 일괄로 바뀝니다.
+  ============================================================================
+-->
+<style>
+/* ===== 0. 토큰 (색/치수) =================================================== */
+:root{
+  /* 본문 색 */
+  --ink:#222426;            /* 제목/진한 본문 */
+  --body:#333538;           /* 본문 */
+  --muted:#6b6e74;          /* 보조 텍스트 */
+
+  /* 장(章) 컬러 — 기본 보라. .c-* 로 덮어씀 */
+  --accent:#5f4b9c;         /* 메인 보라 */
+  --accent-weak:#efecf7;    /* 보라 옅은 배경(표 라벨열/소제목 바) */
+  --accent-line:#cfc7e6;    /* 보라 옅은 테두리 */
+
+  /* 강조 */
+  --hi-yellow:#fff1a6;      /* KMLE 기출 형광 */
+  --hi-grey:#e4e6ea;        /* ACM 기출 음영 */
+  --em-red:#d2322d;         /* 빨강 강조어 */
+  --em-blue:#1f5fb0;        /* 파랑 강조어 */
+
+  /* 중립 회색(헤더/푸터 장치) */
+  --pill-grey:#6c7178;      /* '2027 대비'·페이지번호 알약 (흰 글씨 대비 AA 확보) */
+  --hair:#cdd0d6;           /* 연결선/점선 */
+  --rule:#c8cace;           /* 표 테두리 */
+  --pill-border:#d2d5db;    /* 중앙 타이틀 알약 테두리 */
+
+  /* 치수 */
+  --page-pad: 14mm 15mm 16mm 15mm;
+}
+
+/* 장 컬러 변형 ----------------------------------------------------------- */
+.c-purple{--accent:#5f4b9c;--accent-weak:#efecf7;--accent-line:#cfc7e6;}
+.c-teal  {--accent:#277f74;--accent-weak:#e6f3f1;--accent-line:#bfe0db;}
+.c-blue  {--accent:#3f6cc0;--accent-weak:#eaf0fa;--accent-line:#c4d4ef;}
+.c-orange{--accent:#d9772f;--accent-weak:#fcefe2;--accent-line:#f0d3b6;}
+.c-red   {--accent:#c0463f;--accent-weak:#fbeae9;--accent-line:#eec6c3;}
+
+/* ===== 1. 페이지 골격 (A4) ================================================ */
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+html,body{margin:0;padding:0;}
+body{
+  background:#dfe2e7;                 /* 화면에서 페이지 바깥 회색(인쇄 시 무시) */
+  font-family:"Pretendard","Malgun Gothic","맑은 고딕",-apple-system,"Apple SD Gothic Neo",sans-serif;
+  color:var(--body);
+  font-size:10.3pt;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.page{
+  position:relative;
+  width:210mm;
+  min-height:297mm;          /* 한 장 높이. 내용이 적으면 footer가 바닥에 붙고, 많으면 늘어남(넘침은 눈에 보임) */
+  margin:8mm auto;
+  padding:var(--page-pad);
+  background:#fff;
+  box-shadow:0 1px 8px rgba(0,0,0,.18);
+  display:flex;
+  flex-direction:column;
+}
+
+/* ===== 2. 상단 러닝 헤더 띠 =============================================== */
+/* 구조:  [2027 대비]──( 중앙 타이틀 알약 )────────────  +우측 KMLE/ACM 탭 */
+.runhead{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;        /* 타이틀 알약을 띠 중앙에 둠 */
+  gap:0;
+  margin-bottom:9mm;
+}
+.runhead .year{                  /* 연도 알약은 좌측 고정(흐름에서 빼서 타이틀 중앙정렬을 방해하지 않음) */
+  position:absolute;left:0;top:50%;transform:translateY(-50%);
+  background:var(--pill-grey);
+  color:#fff;
+  font-weight:700;
+  font-size:10pt;
+  letter-spacing:.3px;
+  padding:3px 13px;
+  border-radius:999px;
+  white-space:nowrap;
+}
+.runhead .connector{               /* 알약 사이/바깥 연결선 */
+  flex:1 1 auto;
+  height:1px;
+  background:var(--hair);
+}
+.runhead .connector.short{flex:1 1 auto;}   /* 좌우 연결선이 같은 비율로 자라 타이틀이 정확히 가운데 */
+.runhead .title{
+  flex:0 0 auto;
+  background:#fff;
+  border:1px solid var(--pill-border);
+  border-radius:999px;
+  padding:3px 18px;
+  font-size:9.6pt;
+  color:#2a2c2f;
+  white-space:nowrap;
+}
+.runhead .title b{font-weight:800;letter-spacing:.2px;margin-right:3px;}
+.runhead .tabs{
+  position:absolute;right:0;top:-7mm;
+  display:flex;gap:3px;font-size:7.6pt;font-weight:700;color:#fff;
+}
+.runhead .tabs span{padding:2px 9px 3px;border-radius:0 0 5px 5px;}
+.runhead .tabs .kmle{background:var(--accent);}
+.runhead .tabs .acm {background:var(--pill-grey);}
+
+/* 우측 상단 '장' 러닝 탭 (예: 01 순환기) -------------------------------- */
+.chaptab{
+  position:absolute;right:15mm;top:9mm;
+  font-size:8.4pt;font-weight:700;color:#fff;
+  background:var(--accent);
+  padding:3px 11px;border-radius:0 0 7px 7px;
+}
+
+/* ===== 3. 섹션 번호 뱃지 + 소제목 ========================================= */
+/* 큰 구획(절):  [02] 제목 */
+.sec{display:flex;align-items:center;gap:9px;margin:7mm 0 3.5mm;break-after:avoid;}
+.sec .num{
+  flex:0 0 auto;
+  background:var(--accent);color:#fff;
+  font-weight:800;font-size:11pt;
+  width:26px;height:26px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+}
+.sec .label{font-size:13pt;font-weight:800;color:var(--ink);}
+
+/* 번호 소제목(1. 2. …) — 옅은 컬러 바 + 좌측 틱 ------------------------- */
+.h-num{
+  font-size:11pt;font-weight:700;color:var(--ink);
+  background:var(--accent-weak);
+  border-left:4px solid var(--accent);
+  padding:3px 9px;border-radius:0 4px 4px 0;
+  margin:5mm 0 2mm;break-after:avoid;
+}
+/* 더 작은 소제목(괄호 항목 등) — 컬러 밑줄만 ---------------------------- */
+.h-sub{
+  font-size:10.4pt;font-weight:700;color:var(--accent);
+  border-bottom:1.5px solid var(--accent-line);
+  padding-bottom:2px;margin:4mm 0 1.5mm;display:inline-block;break-after:avoid;
+}
+
+/* ===== 4. 본문 불릿 계층 ================================================== */
+ul.bul{list-style:none;margin:1mm 0;padding-left:4mm;}
+ul.bul>li{position:relative;padding-left:11px;margin:1.3mm 0;}
+ul.bul>li::before{content:"●";position:absolute;left:0;top:0;color:var(--accent);font-size:6pt;line-height:1.9;}
+ul.bul ul{list-style:none;margin:.6mm 0;padding-left:7mm;}
+ul.bul ul>li{position:relative;padding-left:11px;margin:.8mm 0;}
+ul.bul ul>li::before{content:"○";position:absolute;left:0;top:0;color:var(--muted);font-size:6pt;line-height:1.9;}
+ul.bul ul ul>li::before{content:"–";color:var(--muted);font-size:9pt;line-height:1.4;}
+/* 마커 변형 유틸 */
+li.dash::before{content:"–"!important;color:var(--muted)!important;font-size:9pt!important;line-height:1.4!important;}
+li.note::before{content:"※"!important;color:var(--em-red)!important;font-size:8pt!important;line-height:1.6!important;}
+li.arrow::before{content:"▶"!important;color:var(--accent)!important;font-size:7pt!important;line-height:1.7!important;}
+/* 번호 항목 (1)(2) / ①② 는 마커 없이 텍스트로 쓰기 */
+li.plain{padding-left:0!important;}
+li.plain::before{content:""!important;}
+
+/* ===== 5. 강조 / 인라인 ================================================== */
+.r{color:var(--em-red);font-weight:700;}      /* 빨강 강조 */
+.b{color:var(--em-blue);font-weight:700;}      /* 파랑 강조 */
+/* box-decoration-break:clone → 형광이 두 줄에 걸쳐도 padding·radius가 각 줄에 적용돼 안 깨짐 */
+mark.k{background:var(--hi-yellow);padding:0 2px;border-radius:2px;-webkit-box-decoration-break:clone;box-decoration-break:clone;}  /* KMLE 형광 */
+mark.a{background:var(--hi-grey);padding:0 2px;border-radius:2px;-webkit-box-decoration-break:clone;box-decoration-break:clone;}    /* ACM 음영 */
+.eng{font-style:italic;color:#444;}            /* 영문 용어 */
+.u{text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:2px;}
+
+/* ===== 6. 기출 콜아웃 박스 ================================================ */
+.callout{
+  border:1px solid var(--accent-line);
+  border-left:4px solid var(--accent);
+  background:var(--accent-weak);
+  border-radius:0 5px 5px 0;
+  padding:5px 10px;margin:2.5mm 0;
+  font-size:9.8pt;break-inside:avoid;
+}
+.callout .tag{
+  display:inline-block;background:var(--accent);color:#fff;
+  font-size:7.8pt;font-weight:700;border-radius:3px;
+  padding:1px 7px;margin-right:6px;vertical-align:1px;
+}
+/* 범례(형광=KMLE, 음영=ACM) */
+.legend{font-size:8.2pt;color:var(--muted);display:flex;gap:14px;margin:1mm 0 2mm;}
+.legend span{display:inline-flex;align-items:center;gap:4px;}
+.legend i{width:16px;height:10px;border-radius:2px;display:inline-block;}
+
+/* ===== 7. 표 =============================================================== */
+table.tbl{
+  width:100%;border-collapse:collapse;margin:2.5mm 0;
+  font-size:9.4pt;break-inside:avoid;
+}
+table.tbl th,table.tbl td{
+  border:1px solid var(--rule);
+  padding:3.5px 7px;vertical-align:middle;text-align:left;
+}
+table.tbl thead th{
+  background:var(--accent);color:#fff;font-weight:700;text-align:center;
+}
+table.tbl thead th .eng{color:#fff;}   /* 컬러 헤더 위의 영문(.eng)도 흰색으로 — 가독성 */
+table.tbl tbody th{                 /* 좌측 라벨 열 */
+  background:var(--accent-weak);color:var(--ink);font-weight:700;
+  text-align:center;white-space:nowrap;
+}
+table.tbl td.center{text-align:center;}
+table.tbl tbody tr:nth-child(even) td{background:#fafafa;}
+table.tbl thead{display:table-header-group;}   /* 표가 길어 나뉘면 헤더 반복 */
+table.tbl tr{break-inside:avoid;}              /* 행이 페이지 경계에서 잘리지 않게 */
+
+/* ===== 7.5 그림 (figure) ============================================= */
+/* 교재 그림을 캡처해 넣을 때 사용. 테두리 없이 풀폭, 캡션은 보조색.    */
+/* 좌우 배치가 필요하면 .figwrap 을 표/본문 옆에 두지 말고 단독 행으로 */
+/* 두는 것을 권장(그림이 가로로 넓어 좁은 칼럼에선 작아짐).            */
+.figwrap{margin:3mm 0;text-align:center;break-inside:avoid;}
+.figwrap img{max-width:100%;background:#fff;}        /* 검은/회색 테두리 없음 */
+.figwrap figcaption{font-size:8.2pt;color:var(--muted);margin-top:1.5mm;}
+
+/* ===== 8. 하단 푸터 (페이지 알약 + 점선 리더) ============================= */
+.pagefoot{
+  margin-top:auto;padding-top:6mm;
+  display:flex;align-items:center;gap:0;
+}
+.pagefoot .pno{
+  flex:0 0 auto;
+  background:var(--pill-grey);color:#fff;font-weight:700;font-size:9pt;
+  padding:3px 14px;border-radius:999px;
+}
+.pagefoot .dots{
+  flex:1 1 auto;height:0;border-top:1.5px dotted var(--hair);margin-left:4px;
+}
+
+/* ===== 9. 화면 전용 안내(인쇄 시 숨김) ==================================== */
+.screen-note{
+  max-width:210mm;margin:6mm auto 0;padding:0 4mm;color:#5a5d63;font-size:9pt;
+}
+@media print{
+  body{background:#fff;}
+  .page{margin:0;box-shadow:none;}            /* min-height:297mm 유지 — 내용이 넘치면 섹션이 늘어나 눈에 보임(수동 페이지 모델). 자동 클리핑 안 함 */
+  .page{page-break-after:always;}
+  .page:last-child{page-break-after:avoid;}   /* 마지막 페이지 뒤 빈 장 방지 */
+  .screen-note{display:none;}
+  @page{size:A4;margin:0;}
+}
+</style>
+</head>
+<body>
+
+<div class="screen-note">
+  ※ 이 파일은 <b>A4 요약본 템플릿</b>입니다. 인쇄(또는 PDF 저장) 시 회색 여백·이 안내문은
+  사라지고 페이지마다 끊깁니다. 새 요약본은 아래 <code>&lt;section class="page"&gt;</code> 블록을
+  복제해 내용만 채우세요.
+</div>
+
+<!-- ======================================================================= -->
+<!-- 페이지 예시 (장 컬러 = 보라).  .c-teal / .c-blue 등으로 바꿔 쓰세요.    -->
+<!-- ======================================================================= -->
+<section class="page c-purple">
+
+  <!-- 상단 러닝 헤더 띠 -->
+  <header class="runhead">
+    <span class="year">2027 대비</span>
+    <span class="connector short"></span>
+    <span class="title"><b>KMLE</b>· ACM 단권화 요약본</span>
+    <span class="connector"></span>
+  </header>
+  <div class="chaptab">01 순환기</div>
+
+  <!-- 절 번호 뱃지 -->
+  <h2 class="sec"><span class="num">03</span><span class="label">판막질환</span></h2>
+
+  <p class="legend">
+    <span><i style="background:var(--hi-yellow)"></i> 형광 = KMLE 기출</span>
+    <span><i style="background:var(--hi-grey)"></i> 음영 = ACM 기출</span>
+  </p>
+
+  <!-- 번호 소제목 -->
+  <h3 class="h-num">1. 대동맥판막협착증 <span class="eng">(Aortic stenosis, AS)</span></h3>
+
+  <ul class="bul">
+    <li>청진: <mark class="k">Rt. 2nd ICS</mark>의 <span class="b">수축기 잡음</span>, 목동맥으로 방사,
+        A2 작게 들림</li>
+    <li>3대 증상: <span class="r">협심증 · 실신 · 호흡곤란</span>
+      <ul>
+        <li>기대여명: 협심증(5년) &lt; 실신(3년) &lt; 호흡곤란(2년)</li>
+      </ul>
+    </li>
+    <li class="arrow">진단: 심도자술 — LV 수축압과 대동맥 압력차 ↑</li>
+    <li>치료: 보통 수술
+      <ul>
+        <li class="plain">(1) <span class="b">대동맥판막치환술(AVR)</span> — 증상(+) 또는 중증 AS</li>
+        <li class="plain">(2) 경피적 대동맥판막삽입술(TAVI) — 수술 고위험군</li>
+      </ul>
+    </li>
+    <li class="note">부츠 모양 심장 X선 = TOF, AS</li>
+  </ul>
+
+  <!-- 기출 콜아웃 -->
+  <div class="callout">
+    <span class="tag">KMLE 기출</span>
+    노인에서 운동 시 실신 + 우측 2늑간 수축기 잡음 → <b>대동맥판막협착증</b> 진단.
+  </div>
+
+  <!-- 소제목(밑줄형) + 표 -->
+  <h4 class="h-sub">대동맥판막협착증의 중증도</h4>
+  <table class="tbl">
+    <thead>
+      <tr><th>구분</th><th>수축기 평균압력차(mmHg)</th><th>판막면적(cm²)</th><th>최고속도(m/s)</th></tr>
+    </thead>
+    <tbody>
+      <tr><th>경도</th><td class="center">&lt;25</td><td class="center">1.5~2.0</td><td class="center">&lt;3.0</td></tr>
+      <tr><th>중등도</th><td class="center">25~40</td><td class="center">1.0~1.5</td><td class="center">3.0~4.0</td></tr>
+      <tr><th>중증</th><td class="center">&gt;40</td><td class="center">&lt;1.0</td><td class="center">≥4.0</td></tr>
+    </tbody>
+  </table>
+
+  <!-- 하단 페이지 푸터 -->
+  <footer class="pagefoot"><span class="pno">12</span><span class="dots"></span></footer>
+</section>
+
+
+<!-- ======================================================================= -->
+<!-- 컴포넌트 사용 예시 페이지 (장 컬러 = 틸)  ― 복붙용 레퍼런스             -->
+<!-- ======================================================================= -->
+<section class="page c-teal">
+  <header class="runhead">
+    <span class="year">2027 대비</span>
+    <span class="connector short"></span>
+    <span class="title"><b>KMLE</b>· ACM 단권화 요약본</span>
+    <span class="connector"></span>
+  </header>
+  <div class="chaptab">02 호흡기</div>
+
+  <h2 class="sec"><span class="num">01</span><span class="label">컴포넌트 모음 (복붙용)</span></h2>
+
+  <h3 class="h-num">불릿 계층</h3>
+  <ul class="bul">
+    <li>1단계 ● 마커</li>
+    <li>1단계
+      <ul>
+        <li>2단계 ○ 마커</li>
+        <li class="dash">2단계 – 대시</li>
+        <li>3단계
+          <ul><li>3단계 – 마커</li></ul>
+        </li>
+      </ul>
+    </li>
+    <li class="arrow">▶ 화살표 항목</li>
+    <li class="note">※ 주의/암기 포인트</li>
+    <li class="plain">(1) 번호 항목 — <code>li.plain</code></li>
+  </ul>
+
+  <h3 class="h-num">인라인 강조</h3>
+  <ul class="bul">
+    <li><span class="r">빨강 강조</span> · <span class="b">파랑 강조</span> ·
+        <mark class="k">KMLE 형광</mark> · <mark class="a">ACM 음영</mark> ·
+        <span class="eng">italic 영문용어</span> · <span class="u">밑줄</span></li>
+  </ul>
+
+  <h4 class="h-sub">밑줄형 소제목 (h-sub)</h4>
+  <p>본문 단락은 그냥 <code>&lt;p&gt;</code> 로 작성합니다.</p>
+
+  <footer class="pagefoot"><span class="pno">13</span><span class="dots"></span></footer>
+</section>
+
+</body>
+</html>
